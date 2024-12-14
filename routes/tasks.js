@@ -1,41 +1,29 @@
 import express from "express";
+import Taskmodel from "../models/taskmodel.js";
 const router = express.Router()
 
-const tasks = [
-    {
-      id: 1,
-      task: "Task 1",
-    },
-    {
-      id: 2,
-      task: "Task 2",
-    },
-    {
-      id: 3,
-      task: "Task 3",
-    },
-  ];
-
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
     const { task } = req.body
-    tasks.push({ task, id: tasks.length + 1 })
+    let newTask = new Taskmodel({ task })
+    newTask = await newTask.save()
     res.status(201).json({
         msg: "Task added successfully",
         error: false,
-        data: tasks
+        data: newTask
     })
 })
 
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
+    const Tasks = await Taskmodel.find()
     res.status(200).json({
         msg: "Tasks fetched successfully",
         error: false,
-        data: tasks
+        data: Tasks
     })
 })
 
-router.get('/:id', (req, res) => {
-    const task = tasks.find((data) => data.id == req.params.id)
+router.get('/:id', async (req, res) => {
+    const task = await Taskmodel.findOne({ _id: req.params.id })
     if (!task) return res.status(404).json({
         error: true,
         msg: "Task not found",
@@ -49,39 +37,39 @@ router.get('/:id', (req, res) => {
     })
 })
 
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
     const { task } = req.body
-    const taskToUpdate = tasks.find((data) => data.id == req.params.id)
+    const taskToUpdate = await Taskmodel.findByIdAndUpdate(req.params.id,{ task})
     if (!taskToUpdate) return res.status(404).json({
         error: true,
         msg: "Task not found",
         data: null
     })
-    if (taskToUpdate) taskToUpdate.task = task
+
+    taskToUpdate.task = task
 
     res.status(200).json({
-        msg: "Task found successfully",
+        msg: "Task updated successfully",
         error: false,
         data: taskToUpdate
     })
 })
 
 
-router.delete('/:id', (req, res) => {
-    const taskIndex = tasks.findIndex((data) => data.id == req.params.id);
-    if (taskIndex === -1) {
+router.delete('/:id', async(req, res) => {
+    const taskTodelete = await Taskmodel.findByIdAndDelete(req.params.id)
+    if (!taskTodelete) {
         return res.status(404).json({
             error: true,
             msg: "Task not found",
             data: null
         });
     }
-    const deletedTask = tasks.splice(taskIndex, 1);
 
     res.status(200).json({
         msg: "Task deleted successfully",
         error: false,
-        data: deletedTask
+        data: taskTodelete
     });
 });
 

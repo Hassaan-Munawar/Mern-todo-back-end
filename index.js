@@ -1,11 +1,15 @@
 import express from "express";
 import userRoutes from './routes/users.js'
 import taskRoutes from './routes/tasks.js'
+import mongoose from "mongoose";
+import "dotenv/config"
 
 const app = express();
-const PORT = 4000;
 
 app.use(express.json());
+
+mongoose.connect(process.env.MONGODB_URI).then(() => console.log("DB connected"))
+  .catch((err) => console.log(err))
 
 
 function middleware(req, res, next) {
@@ -27,5 +31,5 @@ app.use('/tasks', taskRoutes)
 
 
 
-app.listen(PORT, () => console.log("Server is running on PORT " + PORT));
+app.listen(process.env.PORT, () => console.log("Server is running on PORT " + process.env.PORT));
 

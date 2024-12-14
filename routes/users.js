@@ -1,4 +1,5 @@
 import express from "express";
+import Usermodel from "../models/usermodel.js";
 const router = express.Router()
 
 const users = [
@@ -19,17 +20,24 @@ const users = [
     },
 ]
 
-router.post('/', (req, res) => {
-    const { fullname, email } = req.body
-    users.push({ fullname, email, id: users.length + 1 })
+router.post('/', async(req, res) => {
+    const { fullName, email } = req.body
+    let newUser = new Usermodel({
+        fullName,
+        email,
+    })
+
+    newUser = await newUser.save()
+
     res.status(201).json({
         msg: "User added successfully",
         error: false,
-        data: users
+        data: newUser
     })
 })
 
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
+    const users = await Usermodel.find()
     res.status(200).json({
         msg: "User fetched successfully",
         error: false,
@@ -37,8 +45,8 @@ router.get('/', (req, res) => {
     })
 })
 
-router.get('/:id', (req, res) => {
-    const user = users.find((data) => data.id == req.params.id)
+router.get('/:id', async(req, res) => {
+    const user = await Usermodel.findOne({_id:req.params.id})
     if (!user) return res.status(404).json({
         error: true,
         msg: "User not found",
@@ -52,39 +60,39 @@ router.get('/:id', (req, res) => {
     })
 })
 
-router.put('/:id', (req, res) => {
-    const { fullname, email } = req.body
-    const user = users.find((data) => data.id == req.params.id)
-    if (!user) return res.status(404).json({
+router.put('/:id', async (req, res) => {
+    const { fullName, email } = req.body
+    const userToupdate = await Usermodel.findByIdAndUpdate(req.params.id,{fullName,email})
+    if (!userToupdate) return res.status(404).json({
         error: true,
         msg: "User not found",
         data: null
     })
-    if (fullname) user.fullname = fullname
-    if (email) user.email = email
+
+    userToupdate.fullName = fullName
+    userToupdate.email = email
 
     res.status(200).json({
-        msg: "User found successfully",
+        msg: "User updated successfully",
         error: false,
-        data: user
+        data: userToupdate
     })
 })
 
-router.delete('/:id', (req, res) => {
-    const userIndex = users.findIndex((data) => data.id == req.params.id);
-    if (userIndex === -1) {
+router.delete('/:id', async(req, res) => {
+    const usertoDelete = await Usermodel.findByIdAndDelete(req.params.id)
+    if (!usertoDelete) {
         return res.status(404).json({
             error: true,
             msg: "User not found",
             data: null
         });
     }
-    const deletedUser = users.splice(userIndex, 1);
 
     res.status(200).json({
         msg: "User deleted successfully",
         error: false,
-        data: deletedUser
+        data: usertoDelete
     });
 });
 
