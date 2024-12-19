@@ -21,19 +21,29 @@ const users = [
 ]
 
 router.post('/', async(req, res) => {
-    const { fullName, email } = req.body
-    let newUser = new Usermodel({
-        fullName,
-        email,
-    })
-
-    newUser = await newUser.save()
-
-    res.status(201).json({
-        msg: "User added successfully",
-        error: false,
-        data: newUser
-    })
+    try {
+        const { fullName, email } = req.body
+        let newUser = new Usermodel({
+            fullName,
+            email,
+        })
+    
+        newUser = await newUser.save()
+    
+        res.status(201).json({
+            msg: "User added successfully",
+            error: false,
+            data: newUser
+        })
+        
+    } catch (error) {
+        res.json({
+            msg: error.message,
+            error: true
+        })
+        
+    }
+   
 })
 
 router.get('/', async (req, res) => {

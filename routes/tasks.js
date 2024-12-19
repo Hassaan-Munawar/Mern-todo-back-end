@@ -2,15 +2,36 @@ import express from "express";
 import Taskmodel from "../models/taskmodel.js";
 const router = express.Router()
 
+
+function slugify(str) {
+    return String(str)
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9 -]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
+}
+
 router.post('/', async (req, res) => {
-    const { task } = req.body
-    let newTask = new Taskmodel({ task })
-    newTask = await newTask.save()
-    res.status(201).json({
-        msg: "Task added successfully",
-        error: false,
-        data: newTask
-    })
+    try {
+        const { task } = req.body
+        let newTask = new Taskmodel({ task: task, slug: slugify(task) })
+        newTask = await newTask.save()
+        res.status(201).json({
+            msg: "Task added successfully",
+            error: false,
+            data: newTask
+        })
+
+    } catch (error) {
+        res.json({
+            msg: error.message,
+            error: true,
+        })
+    }
+
 })
 
 router.get('/', async (req, res) => {
@@ -22,8 +43,8 @@ router.get('/', async (req, res) => {
     })
 })
 
-router.get('/:id', async (req, res) => {
-    const task = await Taskmodel.findOne({ _id: req.params.id })
+router.get('/:slug', async (req, res) => {
+    const task = await Taskmodel.findOne({ slug: req.params.slug })
     if (!task) return res.status(404).json({
         error: true,
         msg: "Task not found",
@@ -37,9 +58,10 @@ router.get('/:id', async (req, res) => {
     })
 })
 
+
 router.put('/:id', async (req, res) => {
     const { task } = req.body
-    const taskToUpdate = await Taskmodel.findByIdAndUpdate(req.params.id,{ task})
+    const taskToUpdate = await Taskmodel.findByIdAndUpdate(req.params.id, { task })
     if (!taskToUpdate) return res.status(404).json({
         error: true,
         msg: "Task not found",
@@ -56,7 +78,7 @@ router.put('/:id', async (req, res) => {
 })
 
 
-router.delete('/:id', async(req, res) => {
+router.delete('/:id', async (req, res) => {
     const taskTodelete = await Taskmodel.findByIdAndDelete(req.params.id)
     if (!taskTodelete) {
         return res.status(404).json({
