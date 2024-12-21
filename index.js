@@ -1,8 +1,9 @@
 import express from "express";
-import userRoutes from './routes/users.js'
-import taskRoutes from './routes/tasks.js'
+import userRoutes from './routes/user.js'
+import todoRoutes from './routes/todos.js'
 import mongoose from "mongoose";
 import "dotenv/config"
+import { authenticateUser } from "./middleware/authentication.js";
 
 const app = express();
 
@@ -12,22 +13,15 @@ mongoose.connect(process.env.MONGODB_URI).then(() => console.log("DB connected")
   .catch((err) => console.log(err))
 
 
-function middleware(req, res, next) {
-    req.query.auth == 'true' ? next() : res.send('unauthorized user')
-}
-
-app.use(middleware)
-
-
-app.get("/" , (req, res) => {
-    res.send('User Authorized Successfully...')
+app.get("/" , authenticateUser, (req, res) => {
+    res.send('Welcome '+ req.user.fullname)
 });
 
 
 
-app.use('/users', userRoutes)
+app.use('/user', userRoutes)
 
-app.use('/tasks', taskRoutes)
+app.use('/todos', todoRoutes)
 
 
 
