@@ -24,17 +24,8 @@ router.post('/', authenticateUser, async (req, res) => {
 
 })
 
-// router.get('/', authenticateUser, async (req, res) => {
-//     const Todos = await Todomodel.find({ user: req.user._id })
-//     res.status(200).json({
-//         data: Todos,
-//         message: "Todos fetched successfully",
-//         error: false,
-//     })
-// })
-
-router.get('/', async (req, res) => {
-    const Todos = await Todomodel.find()
+router.get('/', authenticateUser, async (req, res) => {
+    const Todos = await Todomodel.find({ user: req.user._id })
     res.status(200).json({
         data: Todos,
         message: "Todos fetched successfully",

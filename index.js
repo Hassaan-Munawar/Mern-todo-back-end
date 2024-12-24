@@ -13,14 +13,9 @@ mongoose.connect(process.env.MONGODB_URI).then(() => console.log("DB connected")
   .catch((err) => console.log(err))
 
 
-// app.get("/" , authenticateUser, (req, res) => {
-//     res.send('Welcome '+ req.user.fullname)
-// });
-
-app.get("/" , (req, res) => {
-  res.send('Welcome')
+app.get("/" , authenticateUser, (req, res) => {
+    res.send('Welcome '+ req.user.fullname)
 });
-
 
 
 app.use('/user', userRoutes)
