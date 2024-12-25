@@ -14,11 +14,11 @@ const loginSchema = Joi.object({
     password: Joi.string().min(6).required(),
 });
 const registerSchema = Joi.object({
-    fullname: Joi.string().min(3).max(30).required(),
     email: Joi.string().email({
         minDomainSegments: 2,
         tlds: { allow: ["com", "net"] },
     }),
+    fullname: Joi.string().min(3).max(30).required(),
     password: Joi.string().min(6).required(),
 });
 
@@ -35,13 +35,13 @@ router.post('/register', async (req, res) => {
                 error: true,
             })
 
-        const hashedPassword = await bcrypt.hash(value.password, 10);
+        const hashedPassword = await bcrypt.hash(value.password, 12);
         value.password = hashedPassword;
 
         let newUser = new Usermodel({ ...value });
         newUser = await newUser.save();
 
-        res.json({
+        res.status(200).json({
             data: newUser,
             message: "User Registered successfully",
             error: false,
