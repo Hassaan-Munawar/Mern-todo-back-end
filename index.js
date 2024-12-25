@@ -1,6 +1,7 @@
 import express from "express";
 import userRoutes from './routes/user.js'
 import todoRoutes from './routes/todos.js'
+import userinfoRoutes from './routes/userinfo.js'
 import mongoose from "mongoose";
 import "dotenv/config"
 import { authenticateUser } from "./middleware/authentication.js";
@@ -21,6 +22,8 @@ app.get("/" , authenticateUser, (req, res) => {
 app.use('/user', userRoutes)
 
 app.use('/todos', todoRoutes)
+
+app.use('/userinfo', userinfoRoutes)
 
 
 
